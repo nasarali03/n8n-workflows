@@ -1,0 +1,396 @@
+{
+  "name": "Restaurant Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -336,
+        -96
+      ],
+      "id": "f9d4fedc-f8c8-4fc9-a00a-02f1cbdf228f",
+      "name": "When chat message received",
+      "webhookId": "1750a4e7-185b-4729-95ab-204c93e42dfe"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are ChatGPT Eats, a polite and professional restaurant waiter.\n\nBehavior:\n\nGreeting\n\nWhen a user greets you, reply with:\n*“Welcome to ChatGPT Eats! You can:\n\nPlace an order\n\nCheck the menu or stock\n\nRead FAQs”*\n\nOrders\n\nWhen a user asks for food or drink, extract the item name(s).\n\nRespond in a friendly and concise way (like a waiter).\n\nReturn the order in structured JSON so the workflow can process it. Example:\n\n{ \"order\": \"pizza\", \"quantity\": 1 }\n\n\nMenu Requests\n\nIf the user asks for the menu, respond clearly and show item names, prices, and availability.\n\nExample:\n“Here’s our menu: 🍕 Pizza – $8.99, 🍔 Burger – $6.99 …”\n\nFAQs\n\nFor common questions (opening hours, delivery, payment), reply respectfully and briefly.\n\nTone\n\nAlways speak like a friendly restaurant waiter: polite, concise, and helpful.\n\nDo not track stock yourself.\n\nSimply identify the order and pass it in JSON.\n\nThe workflow will handle inventory updates and availability checks."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -128,
+        -96
+      ],
+      "id": "d22def45-7d12-46ab-84f6-89b56326124e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        112
+      ],
+      "id": "b67b9815-00fa-4c3e-a815-323041e40fbd",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "DMa8mfM3JBSaZsER",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        112
+      ],
+      "id": "03ed7777-af34-4067-834e-8eb320b076dc",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "12V_3AlND7c7nROrjzhRQVXLhcX6XvL2Y0hTPaTy78VY",
+          "mode": "list",
+          "cachedResultName": "Restaurant data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12V_3AlND7c7nROrjzhRQVXLhcX6XvL2Y0hTPaTy78VY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1946496662,
+          "mode": "list",
+          "cachedResultName": "Inventory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12V_3AlND7c7nROrjzhRQVXLhcX6XvL2Y0hTPaTy78VY/edit#gid=1946496662"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -32,
+        128
+      ],
+      "id": "2075f388-dcf1-40da-a1e4-1b4ff3682d1c",
+      "name": "get inventory",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qbwcgyGvZfjn7TBp",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "12V_3AlND7c7nROrjzhRQVXLhcX6XvL2Y0hTPaTy78VY",
+          "mode": "list",
+          "cachedResultName": "Restaurant data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12V_3AlND7c7nROrjzhRQVXLhcX6XvL2Y0hTPaTy78VY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 621291573,
+          "mode": "list",
+          "cachedResultName": "Orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12V_3AlND7c7nROrjzhRQVXLhcX6XvL2Y0hTPaTy78VY/edit#gid=621291573"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Customer Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Customer_Name', ``, 'string') }}",
+            "Food Items": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Food_Items', ``, 'string') }}",
+            "Quantity Ordered": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Quantity_Ordered', ``, 'string') }}",
+            "Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Status', ``, 'string') }}",
+            "Order Date": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Food Items",
+              "displayName": "Food Items",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Quantity Ordered",
+              "displayName": "Quantity Ordered",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Order Date",
+              "displayName": "Order Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        176,
+        128
+      ],
+      "id": "9f0d9f9b-c023-434a-9051-12e3eaf566a8",
+      "name": "Orders",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qbwcgyGvZfjn7TBp",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "12V_3AlND7c7nROrjzhRQVXLhcX6XvL2Y0hTPaTy78VY",
+          "mode": "list",
+          "cachedResultName": "Restaurant data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12V_3AlND7c7nROrjzhRQVXLhcX6XvL2Y0hTPaTy78VY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 640292432,
+          "mode": "list",
+          "cachedResultName": "FAQs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12V_3AlND7c7nROrjzhRQVXLhcX6XvL2Y0hTPaTy78VY/edit#gid=640292432"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        320,
+        112
+      ],
+      "id": "c9850947-c194-4d45-848e-2169dd66c5e8",
+      "name": "FAQs",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qbwcgyGvZfjn7TBp",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "12V_3AlND7c7nROrjzhRQVXLhcX6XvL2Y0hTPaTy78VY",
+          "mode": "list",
+          "cachedResultName": "Restaurant data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12V_3AlND7c7nROrjzhRQVXLhcX6XvL2Y0hTPaTy78VY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1946496662,
+          "mode": "list",
+          "cachedResultName": "Inventory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12V_3AlND7c7nROrjzhRQVXLhcX6XvL2Y0hTPaTy78VY/edit#gid=1946496662"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Food Items": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Food_Items', ``, 'string') }}",
+            "Quantity": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Quantity', ``, 'string') }}",
+            "Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Status', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Food Items",
+              "displayName": "Food Items",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Quantity",
+              "displayName": "Quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        80,
+        160
+      ],
+      "id": "1befb53f-c0e5-423e-9eda-48881ba413c4",
+      "name": "Append or update row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qbwcgyGvZfjn7TBp",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get inventory": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orders": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAQs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "95fee25e-ea78-42da-a7a5-a236ace755df",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b68c7b542a02f4c5ec08e1ac6cd44cc7417fe38d26a0604fb3693fd7d1a9c20a"
+  },
+  "id": "BuDBsQAKxURW1E9j",
+  "tags": []
+}
